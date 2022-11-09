@@ -87,6 +87,12 @@ async function run() {
       res.send(services);
     });
 
+    // Service Count
+    app.get("/service_count", async (req, res) => {
+      const totalItem = await serviceCollection.countDocuments({}); 
+      res.send({totalItem});
+    });
+
     //Get Data
     app.get("/users", async (req, res) => {
       const cursor = userCollection.find({});
