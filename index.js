@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { query } = require("express");
 require("dotenv").config();
 
 const app = express();
@@ -43,9 +45,9 @@ function verifyJWT(req, res, next) {
 
 async function run() {
   try {
-    const userCollection = client.db("motiurChember").collection("user");
+    const userCollection = client.db("motiurChember").collection("users");
     const serviceCollection = client.db("motiurChember").collection("services");
-    const ordersCollection = client.db("motiurChember").collection("orders");
+    const reviewsCollection = client.db("motiurChember").collection("reviews");
 
     app.post("/jwt", (req, res) => {
       const user = req.body;
@@ -53,6 +55,36 @@ async function run() {
         expiresIn: "1h",
       });
       res.send({ token });
+    });
+
+    // Add Servicess
+    app.post("/add_service", async (req, res) => {
+      const service = req.body;
+      const result = await serviceCollection.insertOne(service);
+      res.send(result);
+    });
+
+    // Get all services
+    app.get("/service", async (req, res) => {
+      const cursor = await serviceCollection.find({});
+      const services = await cursor.toArray();
+      res.send(services);
+    });
+
+    // Get first 3 services
+    app.get("/service_withlimit", async (req, res) => {
+      const cursor = await serviceCollection.find({}).limit(3);
+      const services = await cursor.toArray();
+      res.send(services);
+    });
+
+    // Get specific services
+    app.get("/service/:id", async (req, res) => {
+      const id = req.params.id;
+      const option = { _id: ObjectId(id) };
+      const cursor = await serviceCollection.find(option);
+      const services = await cursor.toArray();
+      res.send(services);
     });
 
     //Get Data
@@ -110,11 +142,11 @@ async function run() {
       }
     });
 
-    app.get("/service", async (req, res) => {
-      const cursor = await serviceCollection.find({});
-      const users = await cursor.toArray();
-      res.send(users);
-    });
+    // app.get("/service", async (req, res) => {
+    //   const cursor = await serviceCollection.find({});
+    //   const users = await cursor.toArray();
+    //   res.send(users);
+    // });
 
     app.get("/service/:id", async (req, res) => {
       const id = req.params.id;
