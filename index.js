@@ -96,6 +96,50 @@ async function run() {
       res.send({ totalItem });
     });
 
+    // Review section
+
+    // Add Review
+    app.post("/review", async (req, res) => {
+      const userReview = req.body;
+      userReview.dateAdded = new Date();
+      const result = await reviewsCollection.insertOne(userReview);
+      res.send(result);
+    });
+
+    app.get("/review/:id", async (req, res) => {
+      const id = req.params.id;
+      const cursor = reviewsCollection
+        .find({ service_id: id })
+        .sort({ _id: -1 });
+      const review = await cursor.toArray();
+      res.send(review);
+    });
+
+    app.get("/myreview", async (req, res) => {
+      const email = req.query.email;
+      const cursor = reviewsCollection.find({ email: email });
+      const review = await cursor.toArray();
+      res.send(review);
+    });
+
+    // Delete My Review
+    app.delete("/myreview/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await reviewsCollection.deleteOne(query);
+      res.send(result);
+      // if (result.deletedCount > 0) {
+      //   res.send({ status: 1, message: "Successfully deleted" });
+      // } else {
+      //   res.send({
+      //     status: 0,
+      //     message: "No documents matched the query. Deleted 0 documents.",
+      //   });
+      // }
+    });
+
+    /////////////////////////////////////////////////extra section////////////////////////////////////////////
+
     //Get Data
     app.get("/users", async (req, res) => {
       const cursor = userCollection.find({});
