@@ -115,8 +115,14 @@ async function run() {
       res.send(review);
     });
 
-    app.get("/myreview", async (req, res) => {
+    app.get("/myreview", verifyJWT, async (req, res) => {
+      const decode = req.decoded;
       const email = req.query.email;
+      // console.log("inside order API", req.headers);
+      if (decode.email != email) {
+        return res.status(401).send({ message: "unauthorization access" });
+      }
+
       const cursor = reviewsCollection.find({ email: email });
       const review = await cursor.toArray();
       res.send(review);
@@ -148,46 +154,6 @@ async function run() {
 
     /////////////////////////////////////////////////extra section////////////////////////////////////////////
 
-    //Get Data
-    app.get("/users", async (req, res) => {
-      const cursor = userCollection.find({});
-      const users = await cursor.toArray();
-      res.send(users);
-    });
-
-    app.get("/users/:id", async (req, res) => {
-      const id = req.params.id;
-      const cursor = userCollection.find({ _id: ObjectId(id) });
-      const users = await cursor.toArray();
-      res.send(users);
-    });
-
-    // Post Data
-    app.post("/users", async (req, res) => {
-      const userData = req.body;
-      const result = await userCollection.insertOne(userData);
-      userData.id = result.id;
-      console.log(result);
-      res.send(userData);
-    });
-
-    // Update Data
-    app.put("/users/:id", async (req, res) => {
-      const id = req.params.id;
-      const userData = req.body;
-      const filter = { _id: ObjectId(id) };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          name: userData.name,
-          email: userData.email,
-        },
-      };
-
-      const result = await userCollection.updateOne(filter, updateDoc, options);
-      res.send(result);
-    });
-
     // Delete Data
     app.delete("/users/:id", async (req, res) => {
       const id = req.params.id;
@@ -202,12 +168,6 @@ async function run() {
         });
       }
     });
-
-    // app.get("/service", async (req, res) => {
-    //   const cursor = await serviceCollection.find({});
-    //   const users = await cursor.toArray();
-    //   res.send(users);
-    // });
 
     app.get("/service/:id", async (req, res) => {
       const id = req.params.id;
