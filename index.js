@@ -73,7 +73,10 @@ async function run() {
 
     // Get first 3 services
     app.get("/service_withlimit", async (req, res) => {
-      const cursor = await serviceCollection.find({}).limit(3);
+      const cursor = await serviceCollection
+        .find({})
+        .limit(3)
+        .sort({ _id: -1 });
       const services = await cursor.toArray();
       res.send(services);
     });
@@ -89,8 +92,8 @@ async function run() {
 
     // Service Count
     app.get("/service_count", async (req, res) => {
-      const totalItem = await serviceCollection.countDocuments({}); 
-      res.send({totalItem});
+      const totalItem = await serviceCollection.countDocuments({});
+      res.send({ totalItem });
     });
 
     //Get Data
