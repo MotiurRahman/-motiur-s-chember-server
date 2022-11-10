@@ -50,8 +50,8 @@ async function run() {
     const reviewsCollection = client.db("motiurChember").collection("reviews");
 
     app.post("/jwt", (req, res) => {
-      const user = req.body;
-      var token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+      const userEmail = req.body;
+      var token = jwt.sign(userEmail, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
       res.send({ token });
@@ -115,15 +115,23 @@ async function run() {
       res.send(review);
     });
 
-    app.get("/myreview", verifyJWT, async (req, res) => {
-      const decode = req.decoded;
+    app.get("/myreviews", async (req, res) => {
+      //const decode = req.decoded;
       const email = req.query.email;
       // console.log("inside order API", req.headers);
-      if (decode.email != email) {
-        return res.status(401).send({ message: "unauthorization access" });
-      }
+      // if (decode.email != email) {
+      //   return res.status(401).send({ message: "unauthorization access" });
+      // }
+      const cursor = reviewsCollection.find({ email: email }).sort({ _id: -1 });
+      const review = await cursor.toArray();
+      console.log(review);
+      res.send(review);
+    });
 
-      const cursor = reviewsCollection.find({ email: email });
+    //specific review
+    app.get("/myreview/:id", async (req, res) => {
+      const id = req.params.id;
+      const cursor = reviewsCollection.find({ _id: ObjectId(id) });
       const review = await cursor.toArray();
       res.send(review);
     });
@@ -137,9 +145,8 @@ async function run() {
     });
 
     // Update My Review
-
     //patch API
-    app.patch("/myreview/:id", verifyJWT, async (req, res) => {
+    app.patch("/myreview/:id", async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const review = req.body.review;
@@ -151,85 +158,12 @@ async function run() {
       const result = await reviewsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
-
-    /////////////////////////////////////////////////extra section////////////////////////////////////////////
-
-    // Delete Data
-    app.delete("/users/:id", async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await userCollection.deleteOne(query);
-      if (result.deletedCount > 0) {
-        res.send({ status: 1, message: "Successfully deleted" });
-      } else {
-        res.send({
-          status: 0,
-          message: "No documents matched the query. Deleted 0 documents.",
-        });
-      }
-    });
-
-    app.get("/service/:id", async (req, res) => {
-      const id = req.params.id;
-      const cursor = serviceCollection.find({ _id: ObjectId(id) });
-      const users = await cursor.toArray();
-      res.send(users[0]);
-    });
-
-    //Orders API
-    app.post("/orders", async (req, res) => {
-      const ordersData = req.body;
-      const result = await ordersCollection.insertOne(ordersData);
-      res.send(result);
-    });
-
-    //Quiry API
-    app.get("/orders", verifyJWT, async (req, res) => {
-      const decode = req.decoded;
-      console.log("inside order API", decode);
-      if (decode.email != req.query.email) {
-        return res.status(401).send({ message: "unauthorization access" });
-      }
-
-      let query = {};
-      if (req.query.email) {
-        query = {
-          email: req.query.email,
-        };
-      }
-      const cursor = await ordersCollection.find(query);
-      const orders = await cursor.toArray();
-      res.send(orders);
-    });
-
-    //patch API
-    app.patch("/orders/:id", verifyJWT, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const status = req.body.status;
-      const updateDoc = {
-        $set: {
-          status: status,
-        },
-      };
-      const result = await ordersCollection.updateOne(query, updateDoc);
-      res.send(result);
-    });
-
-    //Delete API
-    app.delete("/orders/:id", verifyJWT, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: ObjectId(id) };
-      const result = await ordersCollection.deleteOne(query);
-      res.send(result);
-    });
   } finally {
-    //await client.close();
   }
 }
 
-run().catch((err) => console.log(error));
+run().catch((err) => console.log(err));
 
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
+  console.log(`Server running on port ${port}`);
 });
