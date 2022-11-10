@@ -128,14 +128,22 @@ async function run() {
       const query = { _id: ObjectId(id) };
       const result = await reviewsCollection.deleteOne(query);
       res.send(result);
-      // if (result.deletedCount > 0) {
-      //   res.send({ status: 1, message: "Successfully deleted" });
-      // } else {
-      //   res.send({
-      //     status: 0,
-      //     message: "No documents matched the query. Deleted 0 documents.",
-      //   });
-      // }
+    });
+
+    // Update My Review
+
+    //patch API
+    app.patch("/myreview/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const review = req.body.review;
+      const updateDoc = {
+        $set: {
+          review: review,
+        },
+      };
+      const result = await reviewsCollection.updateOne(query, updateDoc);
+      res.send(result);
     });
 
     /////////////////////////////////////////////////extra section////////////////////////////////////////////
