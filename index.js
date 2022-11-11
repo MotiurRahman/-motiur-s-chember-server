@@ -115,16 +115,16 @@ async function run() {
       res.send(review);
     });
 
-    app.get("/myreviews", async (req, res) => {
-      //const decode = req.decoded;
+    app.get("/myreviews", verifyJWT, async (req, res) => {
+      const decode = req.decoded;
       const email = req.query.email;
       // console.log("inside order API", req.headers);
-      // if (decode.email != email) {
-      //   return res.status(401).send({ message: "unauthorization access" });
-      // }
+      if (decode.email != email) {
+        return res.status(401).send({ message: "unauthorization access" });
+      }
       const cursor = reviewsCollection.find({ email: email }).sort({ _id: -1 });
       const review = await cursor.toArray();
-      console.log(review);
+      //console.log(review);
       res.send(review);
     });
 
