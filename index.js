@@ -23,7 +23,7 @@ console.log(
 );
 
 //const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@hero-one.z3ku6ig.mongodb.net/?retryWrites=true&w=majority`;
-const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@hero-one.z3ku6ig.mongodb.net/?retryWrites=true&w=majority&appName=hero-one`;
+const uri = `mongodb+srv://motiur-chember:VTepYGfior8HzI9J@hero-one.z3ku6ig.mongodb.net/motiurChember?retryWrites=true&w=majority&appName=hero-one`;
 console.log("Mongo URI:", uri);
 
 const client = new MongoClient(uri, {
