@@ -51,7 +51,9 @@ function verifyJWT(req, res, next) {
 
 async function run() {
   try {
-    await client.connect(); // 👈 IMPORTANT
+    console.log("🔌 Connecting to MongoDB...");
+    await client.connect();
+    console.log("✅ MongoDB connected successfully");
 
     const userCollection = client.db("motiurChember").collection("users");
     const serviceCollection = client.db("motiurChember").collection("services");
@@ -170,8 +172,8 @@ async function run() {
       const result = await reviewsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
-  } finally {
-    // keep the client open for dev
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
   }
 }
 
