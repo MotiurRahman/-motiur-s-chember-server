@@ -172,8 +172,8 @@ async function run() {
       const result = await reviewsCollection.updateOne(query, updateDoc);
       res.send(result);
     });
-  } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+  } finally {
+    // keep client open
   }
 }
 
